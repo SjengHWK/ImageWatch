@@ -1,16 +1,18 @@
-package nl.janvangalen.www.dfi_app;
+package nl.janvangalen.www.smartwatch;
 
-import android.annotation.SuppressLint;
-import android.support.v7.app.ActionBar;
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.MotionEvent;
-import android.view.View;
+import android.os.Vibrator;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -19,6 +21,8 @@ import android.webkit.WebView;
 public class FullscreenActivity extends AppCompatActivity {
 
     private WebView mWebView;
+
+    Vibrator vibrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,15 +35,23 @@ public class FullscreenActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_fullscreen);
 
+        vibrator = (Vibrator) getSystemService( VIBRATOR_SERVICE );
+
+        OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder( MyWorker.class )
+                .build();
+
+        WorkManager.getInstance().enqueue( oneTimeWorkRequest );
+
         mWebView = (WebView) findViewById(R.id.activity_fullscreen_webview);
 
         // Enable Javascript
         WebSettings webSettings = mWebView.getSettings();
+        mWebView.setWebViewClient(new WebViewClient());
+        mWebView.setWebChromeClient(new WebChromeClient()); // deze NIET weghalen ... is voor alerts en reload().
         webSettings.setJavaScriptEnabled(true);
 
-        mWebView.loadUrl("https://www.janvangalen.nl");
+        mWebView.loadUrl("file:///android_asset/www/test.html");
 
     }
 
 }
-
